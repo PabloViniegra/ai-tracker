@@ -1,0 +1,62 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI
+.opencode/**
+AGENTS.md
+.agents/**
+opencode.json
+skills-lock.json
+
+# Environment files - NEVER commit secrets
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# TypeScript
+*.tsbuildinfo
+
+# Caches
+.eslintcache
+.stylelintcache
+.cache
+.parcel-cache
+
+# Testing
+coverage
+.nyc_output
+test-results
+playwright-report
+
+# Nuxt/Vue specific
+.nuxt
+.output
+.nitro
+
+# OS files
+Thumbs.db
