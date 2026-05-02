@@ -1,77 +1,51 @@
 <script setup lang="ts">
-import type { ProviderSummary } from '../../types/usage'
+import type { ProviderSummary } from "../../types/usage";
+import { clampUsagePercent, confidenceLabel, getProviderLogo, sourceLabel, statusLabel } from "../../lib/providerPresentation";
 
 defineProps<{
-  providers: readonly ProviderSummary[]
-}>()
+  providers: readonly ProviderSummary[];
+}>();
 
-const _numberFormatter = new Intl.NumberFormat('es-ES')
-
-function _statusLabel(status: ProviderSummary['status']) {
-  const labels = {
-    connected: 'Conectado',
-    needs_credentials: 'Credenciales',
-    experimental: 'Experimental',
-    unsupported: 'Limitado',
-  } satisfies Record<ProviderSummary['status'], string>
-
-  return labels[status]
-}
-
-function _sourceLabel(source: ProviderSummary['source']) {
-  const labels = {
-    official_api: 'API oficial',
-    local_estimate: 'Estimado local',
-    manual: 'Manual',
-  } satisfies Record<ProviderSummary['source'], string>
-
-  return labels[source]
-}
+const numberFormatter = new Intl.NumberFormat("es-ES");
+const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 </script>
 
 <template>
-  <section class="grid gap-4 lg:grid-cols-3" id="providers" aria-label="Provider connectors">
-    <article v-for="provider in providers" :key="provider.id" class="rounded-3xl border border-slate-800 bg-slate-900/60 p-4 transition hover:border-blue-400/40">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-500">{{ provider.id }}</p>
-          <h3 class="mt-1 text-lg font-semibold text-slate-50">{{ provider.name }}</h3>
-        </div>
-        <span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium" :class="{
-          'border-emerald-400/30 bg-emerald-400/10 text-emerald-200': provider.status === 'connected',
-          'border-amber-400/30 bg-amber-400/10 text-amber-200': provider.status === 'needs_credentials',
-          'border-purple-400/30 bg-purple-400/10 text-purple-200': provider.status === 'experimental',
-          'border-slate-600 bg-slate-800 text-slate-300': provider.status === 'unsupported'
-        }">
-          <CheckCircle2 v-if="provider.status === 'connected'" :size="14" aria-hidden="true" />
-          <LockKeyhole v-else-if="provider.status === 'needs_credentials'" :size="14" aria-hidden="true" />
-          <FlaskConical v-else-if="provider.status === 'experimental'" :size="14" aria-hidden="true" />
-          <AlertTriangle v-else :size="14" aria-hidden="true" />
-          {{ statusLabel(provider.status) }}
-        </span>
-      </div>
+  <section class="rounded-[1.75rem] border border-ledger-line bg-ledger-panel p-3" id="providers" aria-label="Provider connectors">
+    <div class="flex items-center justify-between px-1 pb-2">
+      <h2 class="text-sm font-semibold text-ledger-ink">Provider cost strips</h2>
+      <span class="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ledger-muted">tokens · cost · source</span>
+    </div>
 
-      <div class="mt-5 flex items-end justify-between gap-3">
-        <div>
-          <p class="text-sm text-slate-400">Hoy</p>
-          <p class="font-mono text-2xl font-semibold text-slate-50">{{ numberFormatter.format(provider.dailyTokens) }}</p>
+    <div class="divide-y divide-ledger-line/70">
+      <article v-for="provider in providers" :key="provider.id" class="grid gap-2 py-3 first:pt-2 sm:grid-cols-[150px_1fr_auto] sm:items-center">
+        <div class="flex min-w-0 items-center gap-3">
+          <span class="grid size-9 shrink-0 place-items-center rounded-xl border border-ledger-line bg-ledger-paper text-[0.68rem] font-bold text-ledger-ink">
+            <img v-if="getProviderLogo(provider.id).src" class="size-5" :src="getProviderLogo(provider.id).src ?? ''" :alt="`${getProviderLogo(provider.id).label} logo`" />
+            <span v-else aria-hidden="true">{{ getProviderLogo(provider.id).initials }}</span>
+          </span>
+          <span class="min-w-0">
+            <strong class="block truncate text-sm text-ledger-ink">{{ provider.name }}</strong>
+            <span class="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-ledger-muted">{{ statusLabel(provider.status) }}</span>
+          </span>
         </div>
-        <div class="text-right">
-          <p class="text-sm text-slate-400">Semana</p>
-          <p class="font-mono text-lg text-slate-200">{{ numberFormatter.format(provider.weeklyTokens) }}</p>
+
+        <div class="grid gap-1">
+          <div class="flex items-center justify-between gap-3 text-xs text-ledger-muted">
+            <span>{{ numberFormatter.format(provider.dailyTokens) }} today</span>
+            <span class="font-mono text-ledger-ink">{{ provider.costUsd == null ? "cost n/a" : currencyFormatter.format(provider.costUsd) }}</span>
+          </div>
+          <div class="h-1.5 overflow-hidden rounded-full bg-ledger-inset" :aria-label="`${provider.name}: ${clampUsagePercent(provider.quotaUsed)}% shown`">
+            <div class="h-full rounded-full bg-ledger-graphite" :style="{ width: `${clampUsagePercent(provider.quotaUsed)}%` }"></div>
+          </div>
         </div>
-      </div>
 
-      <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-800" aria-hidden="true">
-        <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-amber-400" :style="{ width: `${Math.min(100, Math.max(8, provider.quotaUsed ?? 24))}%` }"></div>
-      </div>
-
-      <div class="mt-4 flex flex-wrap gap-2 text-xs">
-        <span class="rounded-full bg-slate-800 px-2.5 py-1 text-slate-300">{{ sourceLabel(provider.source) }}</span>
-        <span class="rounded-full bg-slate-800 px-2.5 py-1 text-slate-300">Confianza {{ provider.confidence }}</span>
-        <span v-if="provider.capabilities.cost" class="rounded-full bg-slate-800 px-2.5 py-1 text-slate-300">Coste</span>
-        <span v-if="provider.capabilities.quota" class="rounded-full bg-slate-800 px-2.5 py-1 text-slate-300">Cuota</span>
-      </div>
-    </article>
+        <div class="flex flex-wrap gap-1.5 text-[0.68rem] sm:justify-end">
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-ink">{{ sourceLabel(provider.source) }}</span>
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-ink">Conf. {{ confidenceLabel(provider.confidence) }}</span>
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-muted">{{ numberFormatter.format(provider.weeklyTokens) }} week</span>
+        </div>
+      </article>
+    </div>
   </section>
 </template>

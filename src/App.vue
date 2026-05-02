@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useDashboardData } from './composables/useDashboardData'
+import { computed, onMounted } from "vue";
+import HeroMetrics from "./components/dashboard/HeroMetrics.vue";
+import AnthropicSetupPanel from "./components/dashboard/AnthropicSetupPanel.vue";
+import OpenAiSetupPanel from "./components/dashboard/OpenAiSetupPanel.vue";
+import ProviderGrid from "./components/dashboard/ProviderGrid.vue";
+import SyncTimeline from "./components/dashboard/SyncTimeline.vue";
+import UsagePanel from "./components/dashboard/UsagePanel.vue";
+import { useDashboardData } from "./composables/useDashboardData";
 
-const dashboard = useDashboardData()
+const dashboard = useDashboardData();
 
-const _providerCount = computed(() => dashboard.snapshot.value.providers.length)
+const providerCount = computed(() => dashboard.snapshot.value.providers.length);
 
 onMounted(() => {
-  void dashboard.refresh()
-})
+  void dashboard.refresh();
+});
 </script>
 
 <template>
@@ -24,7 +30,6 @@ onMounted(() => {
           :is-loading="dashboard.isLoading.value"
           @sync="dashboard.syncNow"
         />
-
 
         <p v-if="dashboard.errorMessage.value" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
           {{ dashboard.errorMessage.value }}

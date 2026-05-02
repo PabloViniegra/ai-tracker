@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { Activity, Database, KeyRound, Settings, ShieldCheck } from "lucide-vue-next";
+
 defineProps<{
-  connectedCount: number
-  providerCount: number
-}>()
+  connectedCount: number;
+  providerCount: number;
+}>();
 </script>
 
 <template>
