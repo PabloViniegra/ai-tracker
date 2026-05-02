@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import HeroMetrics from "./components/dashboard/HeroMetrics.vue";
-import AnthropicSetupPanel from "./components/dashboard/AnthropicSetupPanel.vue";
-import OpenAiSetupPanel from "./components/dashboard/OpenAiSetupPanel.vue";
-import ProviderGrid from "./components/dashboard/ProviderGrid.vue";
-import SyncTimeline from "./components/dashboard/SyncTimeline.vue";
-import UsagePanel from "./components/dashboard/UsagePanel.vue";
-import { useDashboardData } from "./composables/useDashboardData";
+import { computed, onMounted } from 'vue'
+import HeroMetrics from './components/dashboard/HeroMetrics.vue'
+import AnthropicSetupPanel from './components/dashboard/AnthropicSetupPanel.vue'
+import GeminiSetupPanel from './components/dashboard/GeminiSetupPanel.vue'
+import OpenAiSetupPanel from './components/dashboard/OpenAiSetupPanel.vue'
+import ProviderGrid from './components/dashboard/ProviderGrid.vue'
+import SyncTimeline from './components/dashboard/SyncTimeline.vue'
+import UsagePanel from './components/dashboard/UsagePanel.vue'
+import { useDashboardData } from './composables/useDashboardData'
 
-const dashboard = useDashboardData();
+const dashboard = useDashboardData()
 
-const providerCount = computed(() => dashboard.snapshot.value.providers.length);
+const providerCount = computed(() => dashboard.snapshot.value.providers.length)
 
 onMounted(() => {
-  void dashboard.refresh();
-});
+  void dashboard.refresh()
+})
 </script>
 
 <template>
@@ -45,6 +46,7 @@ onMounted(() => {
         <div class="grid gap-3 md:grid-cols-2">
           <OpenAiSetupPanel @updated="dashboard.refresh" />
           <AnthropicSetupPanel @updated="dashboard.refresh" />
+          <GeminiSetupPanel @updated="dashboard.refresh" />
         </div>
       </main>
     </div>

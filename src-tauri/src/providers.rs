@@ -1,6 +1,6 @@
 use crate::domain::{
-    AnthropicConnectionState, Confidence, OpenAiConnectionState, ProviderCapabilities, ProviderId,
-    ProviderStatus, ProviderSummary, UsageSource,
+    AnthropicConnectionState, Confidence, GeminiConnectionState, OpenAiConnectionState,
+    ProviderCapabilities, ProviderId, ProviderStatus, ProviderSummary, UsageSource,
 };
 use crate::storage::StoredUsageSnapshot;
 
@@ -67,8 +67,8 @@ pub fn base_provider_catalog() -> Vec<ProviderSummary> {
             ProviderId::Gemini,
             ProviderStatus::NeedsCredentials,
             UsageSource::OfficialApi,
-            Confidence::Medium,
-            official(true, true, true),
+            Confidence::Low,
+            official(true, false, false),
         ),
         empty_provider(
             ProviderId::GithubCopilot,
@@ -120,7 +120,10 @@ pub fn merge_openai_summary(
     connection: &OpenAiConnectionState,
     usage: &[StoredUsageSnapshot],
 ) {
-    let Some(openai) = providers.iter_mut().find(|provider| provider.id == ProviderId::Openai) else {
+    let Some(openai) = providers
+        .iter_mut()
+        .find(|provider| provider.id == ProviderId::Openai)
+    else {
         return;
     };
 
@@ -138,12 +141,17 @@ pub fn merge_openai_summary(
 
     openai.weekly_tokens = usage.iter().map(|snapshot| snapshot.total_tokens).sum();
 
-    let weekly_cost = usage.iter().fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
+    let weekly_cost = usage
+        .iter()
+        .fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
     if weekly_cost > 0.0 {
         openai.cost_usd = Some(weekly_cost);
     }
 
-    openai.quota_used = usage.last().map(|snapshot| snapshot.quota_used).filter(|value| *value > 0);
+    openai.quota_used = usage
+        .last()
+        .map(|snapshot| snapshot.quota_used)
+        .filter(|value| *value > 0);
     openai.quota_limit = usage.last().and_then(|snapshot| snapshot.quota_limit);
 }
 
@@ -152,7 +160,10 @@ pub fn merge_anthropic_summary(
     connection: &AnthropicConnectionState,
     usage: &[StoredUsageSnapshot],
 ) {
-    let Some(anthropic) = providers.iter_mut().find(|provider| provider.id == ProviderId::Anthropic) else {
+    let Some(anthropic) = providers
+        .iter_mut()
+        .find(|provider| provider.id == ProviderId::Anthropic)
+    else {
         return;
     };
 
@@ -170,11 +181,56 @@ pub fn merge_anthropic_summary(
 
     anthropic.weekly_tokens = usage.iter().map(|snapshot| snapshot.total_tokens).sum();
 
-    let weekly_cost = usage.iter().fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
+    let weekly_cost = usage
+        .iter()
+        .fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
     if weekly_cost > 0.0 {
         anthropic.cost_usd = Some(weekly_cost);
     }
 
-    anthropic.quota_used = usage.last().map(|snapshot| snapshot.quota_used).filter(|value| *value > 0);
+    anthropic.quota_used = usage
+        .last()
+        .map(|snapshot| snapshot.quota_used)
+        .filter(|value| *value > 0);
     anthropic.quota_limit = usage.last().and_then(|snapshot| snapshot.quota_limit);
+}
+
+pub fn merge_gemini_summary(
+    providers: &mut [ProviderSummary],
+    connection: &GeminiConnectionState,
+    usage: &[StoredUsageSnapshot],
+) {
+    let Some(gemini) = providers
+        .iter_mut()
+        .find(|provider| provider.id == ProviderId::Gemini)
+    else {
+        return;
+    };
+
+    if !connection.has_credentials {
+        gemini.status = ProviderStatus::NeedsCredentials;
+        return;
+    }
+
+    gemini.status = ProviderStatus::Connected;
+    gemini.last_sync = connection.last_sync_at.clone();
+
+    if let Some(latest) = usage.last() {
+        gemini.daily_tokens = latest.total_tokens;
+    }
+
+    gemini.weekly_tokens = usage.iter().map(|snapshot| snapshot.total_tokens).sum();
+
+    let weekly_cost = usage
+        .iter()
+        .fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
+    if weekly_cost > 0.0 {
+        gemini.cost_usd = Some(weekly_cost);
+    }
+
+    gemini.quota_used = usage
+        .last()
+        .map(|snapshot| snapshot.quota_used)
+        .filter(|value| *value > 0);
+    gemini.quota_limit = usage.last().and_then(|snapshot| snapshot.quota_limit);
 }

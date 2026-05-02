@@ -97,3 +97,22 @@ export interface SaveAnthropicCredentialsResult {
   connection: AnthropicConnectionState
   message: string
 }
+
+export interface GeminiConnectionState {
+  hasCredentials: boolean
+  accountLabel: string | null
+  lastValidatedAt: string | null
+  lastSyncAt: string | null
+  lastError: string | null
+  usageAccess: boolean
+}
+
+export interface SaveGeminiCredentialsInput {
+  apiKey: string
+  accountLabel: string | null
+}
+
+export interface SaveGeminiCredentialsResult {
+  connection: GeminiConnectionState
+  message: string
+}

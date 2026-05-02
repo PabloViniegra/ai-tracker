@@ -21,6 +21,15 @@ pub struct AnthropicSettingsRecord {
     pub last_error: Option<String>,
 }
 
+#[derive(Clone, Debug, Default)]
+pub struct GeminiSettingsRecord {
+    pub has_credentials: bool,
+    pub account_label: Option<String>,
+    pub last_validated_at: Option<String>,
+    pub last_sync_at: Option<String>,
+    pub last_error: Option<String>,
+}
+
 #[derive(Clone, Debug)]
 pub struct StoredUsageSnapshot {
     pub usage_date: String,
@@ -64,6 +73,15 @@ pub fn init_database(path: &Path) -> Result<(), String> {
             );
 
             CREATE TABLE IF NOT EXISTS anthropic_settings (
+              id INTEGER PRIMARY KEY CHECK (id = 1),
+              has_credentials INTEGER NOT NULL DEFAULT 0,
+              account_label TEXT,
+              last_validated_at TEXT,
+              last_sync_at TEXT,
+              last_error TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS gemini_settings (
               id INTEGER PRIMARY KEY CHECK (id = 1),
               has_credentials INTEGER NOT NULL DEFAULT 0,
               account_label TEXT,
@@ -182,12 +200,67 @@ pub fn load_anthropic_settings(path: &Path) -> Result<AnthropicSettingsRecord, S
     }
 }
 
-pub fn save_anthropic_settings(path: &Path, settings: &AnthropicSettingsRecord) -> Result<(), String> {
+pub fn save_anthropic_settings(
+    path: &Path,
+    settings: &AnthropicSettingsRecord,
+) -> Result<(), String> {
     let connection = open(path)?;
     connection
         .execute(
             r#"
             INSERT INTO anthropic_settings (id, has_credentials, account_label, last_validated_at, last_sync_at, last_error)
+            VALUES (1, ?1, ?2, ?3, ?4, ?5)
+            ON CONFLICT(id) DO UPDATE SET
+              has_credentials = excluded.has_credentials,
+              account_label = excluded.account_label,
+              last_validated_at = excluded.last_validated_at,
+              last_sync_at = excluded.last_sync_at,
+              last_error = excluded.last_error
+            "#,
+            params![
+                if settings.has_credentials { 1 } else { 0 },
+                settings.account_label,
+                settings.last_validated_at,
+                settings.last_sync_at,
+                settings.last_error,
+            ],
+        )
+        .map_err(|error| error.to_string())?;
+
+    Ok(())
+}
+
+pub fn load_gemini_settings(path: &Path) -> Result<GeminiSettingsRecord, String> {
+    let connection = open(path)?;
+    let mut statement = connection
+        .prepare(
+            "SELECT has_credentials, account_label, last_validated_at, last_sync_at, last_error FROM gemini_settings WHERE id = 1",
+        )
+        .map_err(|error| error.to_string())?;
+
+    let record = statement.query_row([], |row| {
+        Ok(GeminiSettingsRecord {
+            has_credentials: row.get::<_, i64>(0)? > 0,
+            account_label: row.get(1)?,
+            last_validated_at: row.get(2)?,
+            last_sync_at: row.get(3)?,
+            last_error: row.get(4)?,
+        })
+    });
+
+    match record {
+        Ok(settings) => Ok(settings),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(GeminiSettingsRecord::default()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+pub fn save_gemini_settings(path: &Path, settings: &GeminiSettingsRecord) -> Result<(), String> {
+    let connection = open(path)?;
+    connection
+        .execute(
+            r#"
+            INSERT INTO gemini_settings (id, has_credentials, account_label, last_validated_at, last_sync_at, last_error)
             VALUES (1, ?1, ?2, ?3, ?4, ?5)
             ON CONFLICT(id) DO UPDATE SET
               has_credentials = excluded.has_credentials,
@@ -215,7 +288,9 @@ pub fn replace_usage_snapshots(
     snapshots: &[StoredUsageSnapshot],
 ) -> Result<(), String> {
     let mut connection = open(path)?;
-    let transaction = connection.transaction().map_err(|error| error.to_string())?;
+    let transaction = connection
+        .transaction()
+        .map_err(|error| error.to_string())?;
 
     for snapshot in snapshots {
         transaction

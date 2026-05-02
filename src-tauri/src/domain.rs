@@ -170,6 +170,31 @@ pub struct AnthropicConnectionState {
     pub usage_access: bool,
 }
 
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GeminiConnectionState {
+    pub has_credentials: bool,
+    pub account_label: Option<String>,
+    pub last_validated_at: Option<String>,
+    pub last_sync_at: Option<String>,
+    pub last_error: Option<String>,
+    pub usage_access: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveGeminiCredentialsInput {
+    pub api_key: String,
+    pub account_label: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveGeminiCredentialsResult {
+    pub connection: GeminiConnectionState,
+    pub message: String,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveAnthropicCredentialsInput {
