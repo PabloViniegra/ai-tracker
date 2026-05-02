@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # AI
+.superpowers/**
 .opencode/**
 AGENTS.md
 .agents/**

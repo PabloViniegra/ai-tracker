@@ -1,17 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Fira Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", "Cascadia Code", "Fira Code", ui-monospace, Menlo, monospace;
+  --color-ledger-paper: oklch(95.6% 0.018 85);
+  --color-ledger-panel: oklch(91.8% 0.02 82);
+  --color-ledger-inset: oklch(88.2% 0.019 82);
+  --color-ledger-ink: oklch(23.8% 0.018 72);
+  --color-ledger-muted: oklch(52.6% 0.02 74);
+  --color-ledger-line: oklch(78% 0.02 78);
+  --color-ledger-brass: oklch(70% 0.1 84);
+  --color-ledger-brass-soft: oklch(84% 0.06 86);
+  --color-ledger-graphite: oklch(18.8% 0.016 74);
+  --color-ledger-graphite-soft: oklch(27% 0.014 74);
 }
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
     font-family: var(--font-sans);
-    background: #020617;
-    color: #e2e8f0;
+    background: oklch(95.6% 0.018 85);
+    color: oklch(23.8% 0.018 72);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -34,8 +43,9 @@
   }
 
   button:focus-visible,
-  a:focus-visible {
-    outline: 2px solid #f59e0b;
+  a:focus-visible,
+  input:focus-visible {
+    outline: 2px solid oklch(70% 0.1 84);
     outline-offset: 3px;
   }
 }
