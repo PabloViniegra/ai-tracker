@@ -7,7 +7,7 @@ interface ProviderLogo {
 }
 
 const providerLogos = {
-  openai: { src: null, initials: 'OA', label: 'OpenAI' },
+  openai: { src: '/provider-logos/openai.svg', initials: 'OA', label: 'OpenAI' },
   anthropic: { src: '/provider-logos/anthropic.svg', initials: 'A', label: 'Anthropic' },
   gemini: { src: '/provider-logos/google-gemini.svg', initials: 'G', label: 'Google Gemini' },
   github_copilot: {

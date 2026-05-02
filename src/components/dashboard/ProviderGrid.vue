@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import type { ProviderSummary } from "../../types/usage";
-import { clampUsagePercent, confidenceLabel, getProviderLogo, sourceLabel, statusLabel } from "../../lib/providerPresentation";
+import { KeyRound } from 'lucide-vue-next'
+import type { ProviderId, ProviderSummary } from '../../types/usage'
+import { clampUsagePercent, confidenceLabel, getProviderLogo, sourceLabel, statusLabel } from '../../lib/providerPresentation'
 
 defineProps<{
-  providers: readonly ProviderSummary[];
-}>();
+  providers: readonly ProviderSummary[]
+}>()
 
-const numberFormatter = new Intl.NumberFormat("es-ES");
-const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const emit = defineEmits<{
+  connect: [providerId: ProviderId]
+}>()
+
+const numberFormatter = new Intl.NumberFormat('es-ES')
+const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>
@@ -33,17 +38,26 @@ const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", cu
         <div class="grid gap-1">
           <div class="flex items-center justify-between gap-3 text-xs text-ledger-muted">
             <span>{{ numberFormatter.format(provider.dailyTokens) }} today</span>
-            <span class="font-mono text-ledger-ink">{{ provider.costUsd == null ? "cost n/a" : currencyFormatter.format(provider.costUsd) }}</span>
+            <span class="font-mono text-ledger-ink">{{ provider.costUsd == null ? 'cost n/a' : currencyFormatter.format(provider.costUsd) }}</span>
           </div>
           <div class="h-1.5 overflow-hidden rounded-full bg-ledger-inset" :aria-label="`${provider.name}: ${clampUsagePercent(provider.quotaUsed)}% shown`">
             <div class="h-full rounded-full bg-ledger-graphite" :style="{ width: `${clampUsagePercent(provider.quotaUsed)}%` }"></div>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-1.5 text-[0.68rem] sm:justify-end">
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-ink">{{ sourceLabel(provider.source) }}</span>
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-ink">Conf. {{ confidenceLabel(provider.confidence) }}</span>
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-ledger-muted">{{ numberFormatter.format(provider.weeklyTokens) }} week</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button
+            v-if="provider.status === 'needs_credentials'"
+            class="inline-flex items-center gap-1.5 rounded-full bg-ledger-brass px-3 py-1.5 text-xs font-semibold text-ledger-paper transition hover:bg-ledger-brass-soft"
+            type="button"
+            :aria-label="`Connect to ${provider.name}`"
+            @click="emit('connect', provider.id)"
+          >
+            <KeyRound :size="14" aria-hidden="true" /> Connect
+          </button>
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-ink">{{ sourceLabel(provider.source) }}</span>
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-ink">Conf. {{ confidenceLabel(provider.confidence) }}</span>
+          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-muted">{{ numberFormatter.format(provider.weeklyTokens) }} week</span>
         </div>
       </article>
     </div>

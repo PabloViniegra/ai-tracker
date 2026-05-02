@@ -1,17 +1,37 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import type { ProviderId } from './types/usage'
 import HeroMetrics from './components/dashboard/HeroMetrics.vue'
-import AnthropicSetupPanel from './components/dashboard/AnthropicSetupPanel.vue'
-import GeminiSetupPanel from './components/dashboard/GeminiSetupPanel.vue'
-import OpenAiSetupPanel from './components/dashboard/OpenAiSetupPanel.vue'
+import ProviderLoginModal from './components/dashboard/ProviderLoginModal.vue'
 import ProviderGrid from './components/dashboard/ProviderGrid.vue'
 import SyncTimeline from './components/dashboard/SyncTimeline.vue'
 import UsagePanel from './components/dashboard/UsagePanel.vue'
+import OpenAiSetupPanel from './components/dashboard/OpenAiSetupPanel.vue'
+import AnthropicSetupPanel from './components/dashboard/AnthropicSetupPanel.vue'
+import GeminiSetupPanel from './components/dashboard/GeminiSetupPanel.vue'
 import { useDashboardData } from './composables/useDashboardData'
 
 const dashboard = useDashboardData()
 
 const providerCount = computed(() => dashboard.snapshot.value.providers.length)
+
+const activeModal = ref<{ providerId: ProviderId; setupType: 'openai' | 'anthropic' | 'gemini' } | null>(null)
+
+function openModal(providerId: ProviderId) {
+  const setupTypeMap: Record<string, 'openai' | 'anthropic' | 'gemini'> = {
+    openai: 'openai',
+    anthropic: 'anthropic',
+    gemini: 'gemini',
+  }
+  const setupType = setupTypeMap[providerId]
+  if (setupType) {
+    activeModal.value = { providerId, setupType }
+  }
+}
+
+function closeModal() {
+  activeModal.value = null
+}
 
 onMounted(() => {
   void dashboard.refresh()
@@ -36,19 +56,31 @@ onMounted(() => {
           {{ dashboard.errorMessage.value }}
         </p>
 
-        <ProviderGrid :providers="dashboard.snapshot.value.providers" />
+        <ProviderGrid :providers="dashboard.snapshot.value.providers" @connect="openModal" />
 
         <div class="grid gap-3 md:grid-cols-[1fr_280px]">
           <UsagePanel :history="dashboard.snapshot.value.history" />
           <SyncTimeline :events="dashboard.snapshot.value.syncEvents" />
         </div>
-
-        <div class="grid gap-3 md:grid-cols-2">
-          <OpenAiSetupPanel @updated="dashboard.refresh" />
-          <AnthropicSetupPanel @updated="dashboard.refresh" />
-          <GeminiSetupPanel @updated="dashboard.refresh" />
-        </div>
       </main>
     </div>
+
+    <ProviderLoginModal
+      v-if="activeModal"
+      :provider-id="activeModal.providerId"
+      :setup-type="activeModal.setupType"
+      :visible="true"
+      @close="closeModal"
+    >
+      <template v-if="activeModal.setupType === 'openai'">
+        <OpenAiSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
+      </template>
+      <template v-else-if="activeModal.setupType === 'anthropic'">
+        <AnthropicSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
+      </template>
+      <template v-else-if="activeModal.setupType === 'gemini'">
+        <GeminiSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
+      </template>
+    </ProviderLoginModal>
   </div>
 </template>
