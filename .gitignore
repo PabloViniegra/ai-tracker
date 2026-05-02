@@ -30,6 +30,7 @@ AGENTS.md
 .agents/**
 opencode.json
 skills-lock.json
+.serena/**
 
 # Environment files - NEVER commit secrets
 .env
