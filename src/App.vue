@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import AppSidebar from "./components/dashboard/AppSidebar.vue";
 import HeroMetrics from "./components/dashboard/HeroMetrics.vue";
-import AnthropicSetupPanel from "./components/dashboard/AnthropicSetupPanel.vue";
-import OpenAiSetupPanel from "./components/dashboard/OpenAiSetupPanel.vue";
-import ProviderGrid from "./components/dashboard/ProviderGrid.vue";
-import SyncTimeline from "./components/dashboard/SyncTimeline.vue";
-import UsagePanel from "./components/dashboard/UsagePanel.vue";
 import { useDashboardData } from "./composables/useDashboardData";
 
 const dashboard = useDashboardData();
@@ -19,31 +13,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-dvh bg-slate-950 text-slate-100">
-    <div class="grid min-h-dvh lg:grid-cols-[280px_1fr]">
-      <AppSidebar :connected-count="dashboard.connectedProviders.value.length" :provider-count="providerCount" />
+  <div class="min-h-dvh bg-ledger-paper text-ledger-ink">
+    <div class="mx-auto min-h-dvh w-full max-w-[760px] px-3 py-3 sm:px-4">
+      <main class="flex flex-col gap-3" aria-label="AI usage dashboard">
+        <HeroMetrics
+          :daily-tokens="dashboard.totalDailyTokens.value"
+          :weekly-tokens="dashboard.totalWeeklyTokens.value"
+          :total-cost="dashboard.totalCost.value"
+          :connected-count="dashboard.connectedProviders.value.length"
+          :provider-count="providerCount"
+          :is-loading="dashboard.isLoading.value"
+          @sync="dashboard.syncNow"
+        />
 
-      <main class="min-w-0 px-4 py-4 md:px-6 lg:px-8" aria-label="AI usage dashboard">
-        <div class="mx-auto flex max-w-7xl flex-col gap-5">
-          <HeroMetrics
-            :daily-tokens="dashboard.totalDailyTokens.value"
-            :weekly-tokens="dashboard.totalWeeklyTokens.value"
-            :total-cost="dashboard.totalCost.value"
-            :is-loading="dashboard.isLoading.value"
-            @sync="dashboard.syncNow"
-          />
 
-          <p v-if="dashboard.errorMessage.value" class="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-100" role="alert">
-            {{ dashboard.errorMessage.value }}
-          </p>
+        <p v-if="dashboard.errorMessage.value" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+          {{ dashboard.errorMessage.value }}
+        </p>
 
-          <ProviderGrid :providers="dashboard.snapshot.value.providers" />
+        <ProviderGrid :providers="dashboard.snapshot.value.providers" />
 
-          <div class="grid gap-5 xl:grid-cols-[1fr_380px]">
-            <UsagePanel :history="dashboard.snapshot.value.history" />
-            <SyncTimeline :events="dashboard.snapshot.value.syncEvents" />
-          </div>
+        <div class="grid gap-3 md:grid-cols-[1fr_280px]">
+          <UsagePanel :history="dashboard.snapshot.value.history" />
+          <SyncTimeline :events="dashboard.snapshot.value.syncEvents" />
+        </div>
 
+        <div class="grid gap-3 md:grid-cols-2">
           <OpenAiSetupPanel @updated="dashboard.refresh" />
           <AnthropicSetupPanel @updated="dashboard.refresh" />
         </div>
