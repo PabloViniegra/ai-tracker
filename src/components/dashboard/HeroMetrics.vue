@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { Clock3, DollarSign, Gauge, RefreshCw } from "lucide-vue-next";
-
 defineProps<{
-  dailyTokens: number;
-  weeklyTokens: number;
-  totalCost: number;
-  isLoading: boolean;
-}>();
+  dailyTokens: number
+  weeklyTokens: number
+  totalCost: number
+  isLoading: boolean
+}>()
 
 defineEmits<{
-  sync: [];
-}>();
+  sync: []
+}>()
 
-const numberFormatter = new Intl.NumberFormat("es-ES");
-const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const _numberFormatter = new Intl.NumberFormat('es-ES')
+const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>

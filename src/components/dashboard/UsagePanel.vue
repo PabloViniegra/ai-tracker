@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { UsagePoint } from "../../types/usage";
+import type { UsagePoint } from '../../types/usage'
 
 defineProps<{
-  history: readonly UsagePoint[];
-}>();
+  history: readonly UsagePoint[]
+}>()
 
-const numberFormatter = new Intl.NumberFormat("es-ES", { notation: "compact" });
+const _numberFormatter = new Intl.NumberFormat('es-ES', { notation: 'compact' })
 
-function barHeight(tokens: number, history: readonly UsagePoint[]) {
-  const maxTokens = Math.max(...history.map((point) => point.tokens), 1);
-  return `${Math.max(12, Math.round((tokens / maxTokens) * 100))}%`;
+function _barHeight(tokens: number, history: readonly UsagePoint[]) {
+  const maxTokens = Math.max(...history.map((point) => point.tokens), 1)
+  return `${Math.max(12, Math.round((tokens / maxTokens) * 100))}%`
 }
 </script>
 

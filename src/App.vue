@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import HeroMetrics from "./components/dashboard/HeroMetrics.vue";
-import { useDashboardData } from "./composables/useDashboardData";
+import { computed, onMounted } from 'vue'
+import { useDashboardData } from './composables/useDashboardData'
 
-const dashboard = useDashboardData();
+const dashboard = useDashboardData()
 
-const providerCount = computed(() => dashboard.snapshot.value.providers.length);
+const _providerCount = computed(() => dashboard.snapshot.value.providers.length)
 
 onMounted(() => {
-  void dashboard.refresh();
-});
+  void dashboard.refresh()
+})
 </script>
 
 <template>

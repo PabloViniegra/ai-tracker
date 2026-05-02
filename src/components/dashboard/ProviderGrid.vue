@@ -1,32 +1,31 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle2, FlaskConical, LockKeyhole } from "lucide-vue-next";
-import type { ProviderSummary } from "../../types/usage";
+import type { ProviderSummary } from '../../types/usage'
 
 defineProps<{
-  providers: readonly ProviderSummary[];
-}>();
+  providers: readonly ProviderSummary[]
+}>()
 
-const numberFormatter = new Intl.NumberFormat("es-ES");
+const _numberFormatter = new Intl.NumberFormat('es-ES')
 
-function statusLabel(status: ProviderSummary["status"]) {
+function _statusLabel(status: ProviderSummary['status']) {
   const labels = {
-    connected: "Conectado",
-    needs_credentials: "Credenciales",
-    experimental: "Experimental",
-    unsupported: "Limitado",
-  } satisfies Record<ProviderSummary["status"], string>;
+    connected: 'Conectado',
+    needs_credentials: 'Credenciales',
+    experimental: 'Experimental',
+    unsupported: 'Limitado',
+  } satisfies Record<ProviderSummary['status'], string>
 
-  return labels[status];
+  return labels[status]
 }
 
-function sourceLabel(source: ProviderSummary["source"]) {
+function _sourceLabel(source: ProviderSummary['source']) {
   const labels = {
-    official_api: "API oficial",
-    local_estimate: "Estimado local",
-    manual: "Manual",
-  } satisfies Record<ProviderSummary["source"], string>;
+    official_api: 'API oficial',
+    local_estimate: 'Estimado local',
+    manual: 'Manual',
+  } satisfies Record<ProviderSummary['source'], string>
 
-  return labels[source];
+  return labels[source]
 }
 </script>
 
