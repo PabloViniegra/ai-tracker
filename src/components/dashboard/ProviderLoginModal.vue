@@ -4,7 +4,7 @@ import { onMounted, onUnmounted } from 'vue'
 import type { ProviderId } from '../../types/usage'
 import { getProviderLogo } from '../../lib/providerPresentation'
 
-type ProviderSetupType = 'openai' | 'anthropic' | 'gemini'
+type ProviderSetupType = 'openai' | 'anthropic'
 
 defineProps<{
   providerId: ProviderId

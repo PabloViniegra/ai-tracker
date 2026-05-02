@@ -1,6 +1,5 @@
 mod anthropic;
 mod domain;
-mod gemini;
 mod openai;
 mod providers;
 mod security;
@@ -8,21 +7,15 @@ mod storage;
 
 use chrono::{Datelike, Duration, NaiveDate, Utc};
 use domain::{
-    AnthropicConnectionState, DashboardSnapshot, GeminiConnectionState, OpenAiConnectionState,
-    ProviderId, SaveAnthropicCredentialsInput, SaveAnthropicCredentialsResult,
-    SaveGeminiCredentialsInput, SaveGeminiCredentialsResult, SaveOpenAiCredentialsInput,
+    AnthropicConnectionState, DashboardSnapshot, OpenAiConnectionState, ProviderId,
+    SaveAnthropicCredentialsInput, SaveAnthropicCredentialsResult, SaveOpenAiCredentialsInput,
     SaveOpenAiCredentialsResult, SyncEvent, SyncEventStatus, UsagePoint,
 };
-use providers::{
-    base_provider_catalog, merge_anthropic_summary, merge_gemini_summary, merge_openai_summary,
-};
+use providers::{base_provider_catalog, merge_anthropic_summary, merge_openai_summary};
 use reqwest::Client;
 use std::fs;
 use std::path::PathBuf;
-use storage::{
-    AnthropicSettingsRecord, GeminiSettingsRecord, OpenAiSettingsRecord, StoredSyncEvent,
-    StoredUsageSnapshot,
-};
+use storage::{AnthropicSettingsRecord, OpenAiSettingsRecord, StoredSyncEvent, StoredUsageSnapshot};
 use tauri::{Manager, State};
 
 struct AppState {
@@ -63,17 +56,11 @@ fn sync_event_status_from_str(status: &str) -> SyncEventStatus {
     }
 }
 
-fn provider_id_from_str(value: &str) -> ProviderId {
+fn provider_id_from_str(value: &str) -> Option<ProviderId> {
     match value {
-        "anthropic" => ProviderId::Anthropic,
-        "gemini" => ProviderId::Gemini,
-        "github_copilot" => ProviderId::GithubCopilot,
-        "opencode" => ProviderId::Opencode,
-        "kimi" => ProviderId::Kimi,
-        "minimax" => ProviderId::Minimax,
-        "glm" => ProviderId::Glm,
-        "cursor" => ProviderId::Cursor,
-        _ => ProviderId::Openai,
+        "openai" => Some(ProviderId::Openai),
+        "anthropic" => Some(ProviderId::Anthropic),
+        _ => None,
     }
 }
 
@@ -100,20 +87,6 @@ fn anthropic_connection_state_from_record(
         record.has_credentials && record.last_sync_at.is_some() && record.last_error.is_none();
 
     AnthropicConnectionState {
-        has_credentials: record.has_credentials,
-        account_label: record.account_label,
-        last_validated_at: record.last_validated_at,
-        last_sync_at: record.last_sync_at,
-        usage_access,
-        last_error: record.last_error,
-    }
-}
-
-fn gemini_connection_state_from_record(record: GeminiSettingsRecord) -> GeminiConnectionState {
-    let usage_access =
-        record.has_credentials && record.last_sync_at.is_some() && record.last_error.is_none();
-
-    GeminiConnectionState {
         has_credentials: record.has_credentials,
         account_label: record.account_label,
         last_validated_at: record.last_validated_at,
@@ -155,36 +128,32 @@ fn dashboard_snapshot(state: &AppState) -> Result<DashboardSnapshot, String> {
     let anthropic_settings = storage::load_anthropic_settings(&state.db_path)?;
     let anthropic_usage =
         storage::load_usage_history(&state.db_path, ProviderId::Anthropic.as_str(), 7)?;
-    let gemini_settings = storage::load_gemini_settings(&state.db_path)?;
-    let gemini_usage = storage::load_usage_history(&state.db_path, ProviderId::Gemini.as_str(), 7)?;
     let events = storage::load_recent_sync_events(&state.db_path, 10)?;
 
     let openai_connection = connection_state_from_record(openai_settings);
     let anthropic_connection = anthropic_connection_state_from_record(anthropic_settings);
-    let gemini_connection = gemini_connection_state_from_record(gemini_settings);
 
     let mut providers = base_provider_catalog();
     merge_openai_summary(&mut providers, &openai_connection, &openai_usage);
     merge_anthropic_summary(&mut providers, &anthropic_connection, &anthropic_usage);
-    merge_gemini_summary(&mut providers, &gemini_connection, &gemini_usage);
 
     let sync_events = events
         .into_iter()
-        .map(|event| SyncEvent {
-            provider_id: provider_id_from_str(&event.provider_id),
-            provider_name: event.provider_name,
-            status: sync_event_status_from_str(&event.status),
-            message: event.message,
-            at: event.at,
+        .filter_map(|event| {
+            provider_id_from_str(&event.provider_id).map(|provider_id| SyncEvent {
+                provider_id,
+                provider_name: event.provider_name,
+                status: sync_event_status_from_str(&event.status),
+                message: event.message,
+                at: event.at,
+            })
         })
         .collect();
 
     let history = if !openai_usage.is_empty() {
         history_points_from_usage(&openai_usage)
-    } else if !anthropic_usage.is_empty() {
-        history_points_from_usage(&anthropic_usage)
     } else {
-        history_points_from_usage(&gemini_usage)
+        history_points_from_usage(&anthropic_usage)
     };
 
     Ok(DashboardSnapshot {
@@ -271,62 +240,6 @@ fn append_anthropic_event(
             at: at.into(),
         },
     )
-}
-
-fn append_gemini_event(
-    state: &AppState,
-    status: &str,
-    message: impl Into<String>,
-    at: impl Into<String>,
-) -> Result<(), String> {
-    storage::append_sync_event(
-        &state.db_path,
-        &StoredSyncEvent {
-            provider_id: ProviderId::Gemini.as_str().to_string(),
-            provider_name: ProviderId::Gemini.display_name().to_string(),
-            status: status.to_string(),
-            message: message.into(),
-            at: at.into(),
-        },
-    )
-}
-
-async fn sync_gemini_internal(state: &AppState) -> Result<Option<String>, String> {
-    let mut settings = storage::load_gemini_settings(&state.db_path)?;
-    let Some(api_key) = security::load_gemini_api_key(&state.keyring_service)? else {
-        return Ok(Some(
-            "Configura una API key de Gemini antes de sincronizar.".to_string(),
-        ));
-    };
-
-    let synced_at = now_iso();
-    match gemini::sync_usage(&state.http_client, &api_key).await {
-        Ok(snapshots) => {
-            storage::replace_usage_snapshots(
-                &state.db_path,
-                ProviderId::Gemini.as_str(),
-                &snapshots,
-            )?;
-            settings.last_sync_at = Some(synced_at.clone());
-            settings.last_error = None;
-            settings.has_credentials = true;
-            storage::save_gemini_settings(&state.db_path, &settings)?;
-            append_gemini_event(
-                state,
-                "success",
-                "Gemini sincronizado desde usageMetadata capturado.",
-                synced_at,
-            )?;
-            Ok(None)
-        }
-        Err(message) => {
-            settings.last_error = Some(message.clone());
-            settings.has_credentials = true;
-            storage::save_gemini_settings(&state.db_path, &settings)?;
-            append_gemini_event(state, "warning", message.clone(), synced_at)?;
-            Ok(Some(message))
-        }
-    }
 }
 
 async fn sync_anthropic_internal(state: &AppState) -> Result<Option<String>, String> {
@@ -427,12 +340,6 @@ fn get_anthropic_connection(
 }
 
 #[tauri::command]
-fn get_gemini_connection(state: State<'_, AppState>) -> Result<GeminiConnectionState, String> {
-    let record = storage::load_gemini_settings(&state.db_path)?;
-    Ok(gemini_connection_state_from_record(record))
-}
-
-#[tauri::command]
 async fn save_anthropic_credentials(
     state: State<'_, AppState>,
     input: SaveAnthropicCredentialsInput,
@@ -467,40 +374,6 @@ async fn save_anthropic_credentials(
 }
 
 #[tauri::command]
-async fn save_gemini_credentials(
-    state: State<'_, AppState>,
-    input: SaveGeminiCredentialsInput,
-) -> Result<SaveGeminiCredentialsResult, String> {
-    let api_key = input.api_key.trim().to_string();
-    if api_key.is_empty() {
-        return Err("La API key de Gemini no puede estar vacia.".to_string());
-    }
-
-    let mut settings = storage::load_gemini_settings(&state.db_path)?;
-    settings.has_credentials = true;
-    settings.account_label = trim_optional(input.account_label);
-    settings.last_validated_at = Some(now_iso());
-    settings.last_error = None;
-
-    gemini::validate_credentials(&state.http_client, &api_key).await?;
-    security::save_gemini_api_key(&state.keyring_service, &api_key)?;
-    storage::save_gemini_settings(&state.db_path, &settings)?;
-
-    let sync_warning = sync_gemini_internal(&state).await?;
-    let connection =
-        gemini_connection_state_from_record(storage::load_gemini_settings(&state.db_path)?);
-    let message = match sync_warning {
-        Some(warning) => format!("Credenciales guardadas. {warning}"),
-        None => "Credenciales guardadas y sincronizacion inicial completada.".to_string(),
-    };
-
-    Ok(SaveGeminiCredentialsResult {
-        connection,
-        message,
-    })
-}
-
-#[tauri::command]
 async fn sync_all_providers(state: State<'_, AppState>) -> Result<DashboardSnapshot, String> {
     let openai_settings = storage::load_openai_settings(&state.db_path)?;
     if openai_settings.has_credentials {
@@ -510,11 +383,6 @@ async fn sync_all_providers(state: State<'_, AppState>) -> Result<DashboardSnaps
     let anthropic_settings = storage::load_anthropic_settings(&state.db_path)?;
     if anthropic_settings.has_credentials {
         let _ = sync_anthropic_internal(&state).await?;
-    }
-
-    let gemini_settings = storage::load_gemini_settings(&state.db_path)?;
-    if gemini_settings.has_credentials {
-        let _ = sync_gemini_internal(&state).await?;
     }
 
     dashboard_snapshot(&state)
@@ -548,8 +416,6 @@ pub fn run() {
             save_openai_credentials,
             get_anthropic_connection,
             save_anthropic_credentials,
-            get_gemini_connection,
-            save_gemini_credentials,
             sync_all_providers
         ])
         .run(tauri::generate_context!())

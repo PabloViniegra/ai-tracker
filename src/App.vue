@@ -8,20 +8,18 @@ import SyncTimeline from './components/dashboard/SyncTimeline.vue'
 import UsagePanel from './components/dashboard/UsagePanel.vue'
 import OpenAiSetupPanel from './components/dashboard/OpenAiSetupPanel.vue'
 import AnthropicSetupPanel from './components/dashboard/AnthropicSetupPanel.vue'
-import GeminiSetupPanel from './components/dashboard/GeminiSetupPanel.vue'
 import { useDashboardData } from './composables/useDashboardData'
 
 const dashboard = useDashboardData()
 
 const providerCount = computed(() => dashboard.snapshot.value.providers.length)
 
-const activeModal = ref<{ providerId: ProviderId; setupType: 'openai' | 'anthropic' | 'gemini' } | null>(null)
+const activeModal = ref<{ providerId: ProviderId; setupType: 'openai' | 'anthropic' } | null>(null)
 
 function openModal(providerId: ProviderId) {
-  const setupTypeMap: Record<string, 'openai' | 'anthropic' | 'gemini'> = {
+  const setupTypeMap: Record<string, 'openai' | 'anthropic'> = {
     openai: 'openai',
     anthropic: 'anthropic',
-    gemini: 'gemini',
   }
   const setupType = setupTypeMap[providerId]
   if (setupType) {
@@ -77,9 +75,6 @@ onMounted(() => {
       </template>
       <template v-else-if="activeModal.setupType === 'anthropic'">
         <AnthropicSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
-      </template>
-      <template v-else-if="activeModal.setupType === 'gemini'">
-        <GeminiSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
       </template>
     </ProviderLoginModal>
   </div>

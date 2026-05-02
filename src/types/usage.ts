@@ -1,17 +1,10 @@
 export type ProviderId =
   | 'openai'
   | 'anthropic'
-  | 'gemini'
-  | 'github_copilot'
-  | 'opencode'
-  | 'kimi'
-  | 'minimax'
-  | 'glm'
-  | 'cursor'
 
-export type UsageSource = 'official_api' | 'local_estimate' | 'manual'
-export type Confidence = 'high' | 'medium' | 'low'
-export type ProviderStatus = 'connected' | 'needs_credentials' | 'experimental' | 'unsupported'
+export type UsageSource = 'official_api'
+export type Confidence = 'high'
+export type ProviderStatus = 'connected' | 'needs_credentials'
 
 export interface ProviderCapabilities {
   tokens: boolean
@@ -95,24 +88,5 @@ export interface SaveAnthropicCredentialsInput {
 
 export interface SaveAnthropicCredentialsResult {
   connection: AnthropicConnectionState
-  message: string
-}
-
-export interface GeminiConnectionState {
-  hasCredentials: boolean
-  accountLabel: string | null
-  lastValidatedAt: string | null
-  lastSyncAt: string | null
-  lastError: string | null
-  usageAccess: boolean
-}
-
-export interface SaveGeminiCredentialsInput {
-  apiKey: string
-  accountLabel: string | null
-}
-
-export interface SaveGeminiCredentialsResult {
-  connection: GeminiConnectionState
   message: string
 }
