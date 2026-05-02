@@ -21,7 +21,34 @@ describe('providerPresentation', () => {
       src: '/provider-logos/anthropic.svg',
       label: 'Anthropic',
     })
-    expect(getProviderLogo('openai')).toMatchObject({ src: null, initials: 'OA', label: 'OpenAI' })
+    expect(getProviderLogo('openai')).toMatchObject({ src: '/provider-logos/openai.svg', initials: 'OA', label: 'OpenAI' })
+  })
+
+  it('returns correct logo for all providers with official icons', () => {
+    expect(getProviderLogo('openai').src).toBe('/provider-logos/openai.svg')
+    expect(getProviderLogo('anthropic').src).toBe('/provider-logos/anthropic.svg')
+    expect(getProviderLogo('gemini').src).toBe('/provider-logos/google-gemini.svg')
+    expect(getProviderLogo('github_copilot').src).toBe('/provider-logos/github-copilot.svg')
+    expect(getProviderLogo('minimax').src).toBe('/provider-logos/minimax.svg')
+    expect(getProviderLogo('cursor').src).toBe('/provider-logos/cursor.svg')
+  })
+
+  it('returns null src for providers without official icons', () => {
+    expect(getProviderLogo('opencode').src).toBeNull()
+    expect(getProviderLogo('kimi').src).toBeNull()
+    expect(getProviderLogo('glm').src).toBeNull()
+  })
+
+  it('returns correct initials for all providers', () => {
+    expect(getProviderLogo('openai').initials).toBe('OA')
+    expect(getProviderLogo('anthropic').initials).toBe('A')
+    expect(getProviderLogo('gemini').initials).toBe('G')
+    expect(getProviderLogo('github_copilot').initials).toBe('GH')
+    expect(getProviderLogo('opencode').initials).toBe('OC')
+    expect(getProviderLogo('kimi').initials).toBe('K')
+    expect(getProviderLogo('minimax').initials).toBe('MM')
+    expect(getProviderLogo('glm').initials).toBe('GL')
+    expect(getProviderLogo('cursor').initials).toBe('C')
   })
 
   it('keeps source, confidence, and status labels explicit', () => {
