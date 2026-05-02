@@ -5,13 +5,6 @@ use serde::{Deserialize, Serialize};
 pub enum ProviderId {
     Openai,
     Anthropic,
-    Gemini,
-    GithubCopilot,
-    Opencode,
-    Kimi,
-    Minimax,
-    Glm,
-    Cursor,
 }
 
 impl ProviderId {
@@ -19,13 +12,6 @@ impl ProviderId {
         match self {
             Self::Openai => "openai",
             Self::Anthropic => "anthropic",
-            Self::Gemini => "gemini",
-            Self::GithubCopilot => "github_copilot",
-            Self::Opencode => "opencode",
-            Self::Kimi => "kimi",
-            Self::Minimax => "minimax",
-            Self::Glm => "glm",
-            Self::Cursor => "cursor",
         }
     }
 
@@ -33,13 +19,6 @@ impl ProviderId {
         match self {
             Self::Openai => "OpenAI",
             Self::Anthropic => "Anthropic Claude",
-            Self::Gemini => "Google Gemini",
-            Self::GithubCopilot => "GitHub Copilot",
-            Self::Opencode => "Opencode",
-            Self::Kimi => "Kimi",
-            Self::Minimax => "Minimax",
-            Self::Glm => "GLM",
-            Self::Cursor => "Cursor",
         }
     }
 }
@@ -48,16 +27,12 @@ impl ProviderId {
 #[serde(rename_all = "snake_case")]
 pub enum UsageSource {
     OfficialApi,
-    LocalEstimate,
-    Manual,
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Confidence {
     High,
-    Medium,
-    Low,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -65,8 +40,6 @@ pub enum Confidence {
 pub enum ProviderStatus {
     Connected,
     NeedsCredentials,
-    Experimental,
-    Unsupported,
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -168,31 +141,6 @@ pub struct AnthropicConnectionState {
     pub last_sync_at: Option<String>,
     pub last_error: Option<String>,
     pub usage_access: bool,
-}
-
-#[derive(Clone, Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GeminiConnectionState {
-    pub has_credentials: bool,
-    pub account_label: Option<String>,
-    pub last_validated_at: Option<String>,
-    pub last_sync_at: Option<String>,
-    pub last_error: Option<String>,
-    pub usage_access: bool,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SaveGeminiCredentialsInput {
-    pub api_key: String,
-    pub account_label: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SaveGeminiCredentialsResult {
-    pub connection: GeminiConnectionState,
-    pub message: String,
 }
 
 #[derive(Debug, Deserialize)]

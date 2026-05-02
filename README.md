@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Vitest-729B1B?logo=vitest&logoColor=white&style=for-the-badge" alt="Vitest" />
 </p>
 
-A privacy-first desktop application for tracking AI subscription token usage across multiple providers. AI Tracker aggregates daily and weekly usage data from OpenAI, Anthropic, Google Gemini, GitHub Copilot, and more -- all stored locally on your machine with no cloud backend.
+A privacy-first desktop application for tracking AI subscription token usage locally. AI Tracker currently aggregates daily and weekly usage data from OpenAI and Anthropic, with no cloud backend.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ A privacy-first desktop application for tracking AI subscription token usage acr
 ## Features
 
 - **Local-first**: All data stays on your machine. No cloud backend in the MVP.
-- **Multi-provider tracking**: Monitor token usage across AI providers from a single dashboard.
+- **Focused provider tracking**: Monitor token usage from OpenAI and Anthropic from a single dashboard.
 - **Transparency**: Every usage value includes a source label and confidence level (official API, local estimate, or manual).
 - **Secure credentials**: Secrets stored via OS keyring (Windows DPAPI), never in frontend state.
 - **Historical trends**: Daily and weekly usage snapshots retained locally for trend analysis.
@@ -40,15 +40,8 @@ A privacy-first desktop application for tracking AI subscription token usage acr
 
 | Provider | Status |
 |----------|--------|
-| OpenAI | Planned |
-| Anthropic | Planned |
-| Google Gemini | Planned |
-| GitHub Copilot | Planned |
-| Opencode | Planned |
-| Kimi | Planned |
-| Minimax | Planned |
-| GLM | Planned |
-| Cursor | Planned |
+| OpenAI | Active |
+| Anthropic | Active |
 
 ## Tech Stack
 

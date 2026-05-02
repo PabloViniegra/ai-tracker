@@ -1,6 +1,6 @@
 use crate::domain::{
-    AnthropicConnectionState, Confidence, GeminiConnectionState, OpenAiConnectionState,
-    ProviderCapabilities, ProviderId, ProviderStatus, ProviderSummary, UsageSource,
+    AnthropicConnectionState, Confidence, OpenAiConnectionState, ProviderCapabilities,
+    ProviderId, ProviderStatus, ProviderSummary, UsageSource,
 };
 use crate::storage::StoredUsageSnapshot;
 
@@ -11,16 +11,6 @@ fn official(tokens: bool, cost: bool, quota: bool) -> ProviderCapabilities {
         quota,
         realtime: false,
         historical: true,
-    }
-}
-
-fn experimental(tokens: bool) -> ProviderCapabilities {
-    ProviderCapabilities {
-        tokens,
-        cost: false,
-        quota: false,
-        realtime: false,
-        historical: false,
     }
 }
 
@@ -62,55 +52,6 @@ pub fn base_provider_catalog() -> Vec<ProviderSummary> {
             UsageSource::OfficialApi,
             Confidence::High,
             official(true, true, false),
-        ),
-        empty_provider(
-            ProviderId::Gemini,
-            ProviderStatus::NeedsCredentials,
-            UsageSource::OfficialApi,
-            Confidence::Low,
-            official(true, false, false),
-        ),
-        empty_provider(
-            ProviderId::GithubCopilot,
-            ProviderStatus::Unsupported,
-            UsageSource::Manual,
-            Confidence::Low,
-            experimental(false),
-        ),
-        empty_provider(
-            ProviderId::Opencode,
-            ProviderStatus::Experimental,
-            UsageSource::LocalEstimate,
-            Confidence::Low,
-            experimental(true),
-        ),
-        empty_provider(
-            ProviderId::Kimi,
-            ProviderStatus::NeedsCredentials,
-            UsageSource::OfficialApi,
-            Confidence::Medium,
-            official(true, true, false),
-        ),
-        empty_provider(
-            ProviderId::Minimax,
-            ProviderStatus::NeedsCredentials,
-            UsageSource::OfficialApi,
-            Confidence::Medium,
-            official(true, true, false),
-        ),
-        empty_provider(
-            ProviderId::Glm,
-            ProviderStatus::NeedsCredentials,
-            UsageSource::OfficialApi,
-            Confidence::Medium,
-            official(true, true, false),
-        ),
-        empty_provider(
-            ProviderId::Cursor,
-            ProviderStatus::Experimental,
-            UsageSource::LocalEstimate,
-            Confidence::Low,
-            experimental(true),
         ),
     ]
 }
@@ -193,44 +134,4 @@ pub fn merge_anthropic_summary(
         .map(|snapshot| snapshot.quota_used)
         .filter(|value| *value > 0);
     anthropic.quota_limit = usage.last().and_then(|snapshot| snapshot.quota_limit);
-}
-
-pub fn merge_gemini_summary(
-    providers: &mut [ProviderSummary],
-    connection: &GeminiConnectionState,
-    usage: &[StoredUsageSnapshot],
-) {
-    let Some(gemini) = providers
-        .iter_mut()
-        .find(|provider| provider.id == ProviderId::Gemini)
-    else {
-        return;
-    };
-
-    if !connection.has_credentials {
-        gemini.status = ProviderStatus::NeedsCredentials;
-        return;
-    }
-
-    gemini.status = ProviderStatus::Connected;
-    gemini.last_sync = connection.last_sync_at.clone();
-
-    if let Some(latest) = usage.last() {
-        gemini.daily_tokens = latest.total_tokens;
-    }
-
-    gemini.weekly_tokens = usage.iter().map(|snapshot| snapshot.total_tokens).sum();
-
-    let weekly_cost = usage
-        .iter()
-        .fold(0.0, |sum, snapshot| sum + snapshot.cost_usd.unwrap_or(0.0));
-    if weekly_cost > 0.0 {
-        gemini.cost_usd = Some(weekly_cost);
-    }
-
-    gemini.quota_used = usage
-        .last()
-        .map(|snapshot| snapshot.quota_used)
-        .filter(|value| *value > 0);
-    gemini.quota_limit = usage.last().and_then(|snapshot| snapshot.quota_limit);
 }

@@ -14,13 +14,6 @@ AI Tracker is a Windows desktop app for tracking AI subscription token usage acr
 
 - OpenAI
 - Anthropic
-- Google Gemini
-- GitHub Copilot
-- Opencode
-- Kimi
-- Minimax
-- GLM
-- Cursor
 
 ## Product Principles
 
@@ -35,5 +28,4 @@ AI Tracker is a Windows desktop app for tracking AI subscription token usage acr
 - The app launches as a Tauri Windows desktop app.
 - The dashboard shows provider status, token totals, cost, confidence, and sync recency.
 - Provider data flows through Tauri commands instead of hard-coded UI-only state.
-- The architecture can add real OpenAI, Anthropic, and Gemini connectors next.
-- The UI communicates limitations for experimental providers clearly.
+- The architecture can add back additional providers later without changing the dashboard contract.

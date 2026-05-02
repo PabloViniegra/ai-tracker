@@ -46,10 +46,8 @@ Each snapshot exposes a common shape:
 
 ## Provider Strategy
 
-- OpenAI, Anthropic, and Gemini are first-class official connector targets.
-- Kimi, Minimax, and GLM are official connector candidates if their APIs expose usage.
-- GitHub Copilot, Cursor, and Opencode start as experimental because reliable individual usage APIs may be unavailable.
-- Experimental connectors must show low/medium confidence and avoid implying official precision.
+- OpenAI and Anthropic are the only active providers in the current product scope.
+- Additional providers can return later, but should not appear in the dashboard or shared contracts until their connector path is intentionally restored.
 
 ## Visual System
 
