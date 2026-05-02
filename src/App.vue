@@ -73,7 +73,7 @@ onMounted(() => {
       @close="closeModal"
     >
       <template v-if="activeModal.setupType === 'openai'">
-        <OpenAiSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
+        <OpenAiSetupPanel is-modal @updated="dashboard.refresh" />
       </template>
       <template v-else-if="activeModal.setupType === 'anthropic'">
         <AnthropicSetupPanel is-modal @updated="dashboard.refresh(); closeModal()" />
