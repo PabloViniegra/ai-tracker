@@ -21,7 +21,11 @@ describe('providerPresentation', () => {
       src: '/provider-logos/anthropic.svg',
       label: 'Anthropic',
     })
-    expect(getProviderLogo('openai')).toMatchObject({ src: '/provider-logos/openai.svg', initials: 'OA', label: 'OpenAI' })
+    expect(getProviderLogo('openai')).toMatchObject({
+      src: '/provider-logos/openai.svg',
+      initials: 'OA',
+      label: 'OpenAI',
+    })
   })
 
   it('returns correct logo for the active providers', () => {

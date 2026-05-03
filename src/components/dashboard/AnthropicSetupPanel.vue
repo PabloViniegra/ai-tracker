@@ -1,86 +1,91 @@
 <script setup lang="ts">
-import { invoke } from "@tauri-apps/api/core";
-import { KeyRound, RefreshCw, Shield } from "lucide-vue-next";
-import { onMounted, reactive, shallowRef } from "vue";
+import { invoke } from '@tauri-apps/api/core'
+import { onMounted, reactive, shallowRef } from 'vue'
 import type {
   AnthropicConnectionState,
   DashboardSnapshot,
   SaveAnthropicCredentialsInput,
   SaveAnthropicCredentialsResult,
-} from "../../types/usage";
+} from '../../types/usage'
 
-withDefaults(defineProps<{
-  isModal?: boolean
-}>(), {
-  isModal: false,
-})
+withDefaults(
+  defineProps<{
+    isModal?: boolean
+  }>(),
+  {
+    isModal: false,
+  },
+)
 
 const emit = defineEmits<{
-  updated: [];
-}>();
+  updated: []
+}>()
 
 const form = reactive({
-  apiKey: "",
-  accountLabel: "",
-});
+  apiKey: '',
+  accountLabel: '',
+})
 
-const connection = shallowRef<AnthropicConnectionState | null>(null);
-const isLoading = shallowRef(false);
-const message = shallowRef<string | null>(null);
-const errorMessage = shallowRef<string | null>(null);
+const connection = shallowRef<AnthropicConnectionState | null>(null)
+const isLoading = shallowRef(false)
+const message = shallowRef<string | null>(null)
+const errorMessage = shallowRef<string | null>(null)
 
 async function loadConnection() {
   try {
-    connection.value = await invoke<AnthropicConnectionState>("get_anthropic_connection");
-    form.accountLabel = connection.value.accountLabel ?? "";
+    connection.value = await invoke<AnthropicConnectionState>('get_anthropic_connection')
+    form.accountLabel = connection.value.accountLabel ?? ''
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Could not read Anthropic configuration";
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Could not read Anthropic configuration'
   }
 }
 
-async function saveCredentials() {
-  isLoading.value = true;
-  message.value = null;
-  errorMessage.value = null;
+async function _saveCredentials() {
+  isLoading.value = true
+  message.value = null
+  errorMessage.value = null
 
   try {
     const payload: SaveAnthropicCredentialsInput = {
       apiKey: form.apiKey,
       accountLabel: form.accountLabel || null,
-    };
+    }
 
-    const result = await invoke<SaveAnthropicCredentialsResult>("save_anthropic_credentials", { input: payload });
-    connection.value = result.connection;
-    message.value = result.message;
-    form.apiKey = "";
-    emit("updated");
+    const result = await invoke<SaveAnthropicCredentialsResult>('save_anthropic_credentials', {
+      input: payload,
+    })
+    connection.value = result.connection
+    message.value = result.message
+    form.apiKey = ''
+    emit('updated')
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Could not save the API key";
+    errorMessage.value = error instanceof Error ? error.message : 'Could not save the API key'
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
-async function syncAnthropic() {
-  isLoading.value = true;
-  message.value = null;
-  errorMessage.value = null;
+async function _syncAnthropic() {
+  isLoading.value = true
+  message.value = null
+  errorMessage.value = null
 
   try {
-    await invoke<DashboardSnapshot>("sync_all_providers");
-    await loadConnection();
-    message.value = "Sync requested. Check the sync log for results.";
-    emit("updated");
+    await invoke<DashboardSnapshot>('sync_all_providers')
+    await loadConnection()
+    message.value = 'Sync requested. Check the sync log for results.'
+    emit('updated')
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Could not sync Anthropic";
+    errorMessage.value = error instanceof Error ? error.message : 'Could not sync Anthropic'
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
 onMounted(() => {
-  void loadConnection();
-});
+  void loadConnection()
+})
 </script>
 
 <template>

@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { KeyRound } from 'lucide-vue-next'
 import type { ProviderId, ProviderSummary } from '../../types/usage'
-import { clampUsagePercent, confidenceLabel, getProviderLogo, sourceLabel, statusLabel } from '../../lib/providerPresentation'
 
 defineProps<{
   providers: readonly ProviderSummary[]
 }>()
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   connect: [providerId: ProviderId]
 }>()
 
-const numberFormatter = new Intl.NumberFormat('es-ES')
-const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const _numberFormatter = new Intl.NumberFormat('es-ES')
+const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>
@@ -55,9 +53,11 @@ const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', cu
           >
             <KeyRound :size="14" aria-hidden="true" /> Connect
           </button>
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-ink">{{ sourceLabel(provider.source) }}</span>
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-ink">Conf. {{ confidenceLabel(provider.confidence) }}</span>
-          <span class="rounded-full bg-ledger-inset px-2 py-1 text-[0.68rem] text-ledger-muted">{{ numberFormatter.format(provider.weeklyTokens) }} week</span>
+          <SourceIndicator
+            :source="provider.source"
+            :confidence="provider.confidence"
+            :last-sync="provider.lastSync"
+          />
         </div>
       </article>
     </div>

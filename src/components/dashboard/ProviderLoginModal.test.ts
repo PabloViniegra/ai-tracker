@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ProviderId } from '../../types/usage'
 import { getProviderLogo } from '../../lib/providerPresentation'
+import type { ProviderId } from '../../types/usage'
 
 describe('ProviderLoginModal', () => {
   describe('getProviderLogo', () => {
@@ -17,7 +17,6 @@ describe('ProviderLoginModal', () => {
       expect(logo.initials).toBe('A')
       expect(logo.src).toBe('/provider-logos/anthropic.svg')
     })
-
   })
 
   describe('modal setup type mapping', () => {
@@ -26,7 +25,7 @@ describe('ProviderLoginModal', () => {
         openai: 'openai',
         anthropic: 'anthropic',
       }
-      expect(setupTypeMap['openai']).toBe('openai')
+      expect(setupTypeMap.openai).toBe('openai')
     })
 
     it('maps anthropic provider to anthropic setup type', () => {
@@ -34,7 +33,7 @@ describe('ProviderLoginModal', () => {
         openai: 'openai',
         anthropic: 'anthropic',
       }
-      expect(setupTypeMap['anthropic']).toBe('anthropic')
+      expect(setupTypeMap.anthropic).toBe('anthropic')
     })
 
     it('does not map other provider ids', () => {
@@ -42,8 +41,8 @@ describe('ProviderLoginModal', () => {
         openai: 'openai',
         anthropic: 'anthropic',
       }
-      expect(setupTypeMap['legacy_provider']).toBeUndefined()
-      expect(setupTypeMap['unknown']).toBeUndefined()
+      expect(setupTypeMap.legacy_provider).toBeUndefined()
+      expect(setupTypeMap.unknown).toBeUndefined()
     })
   })
 
@@ -61,7 +60,10 @@ describe('ProviderLoginModal', () => {
     })
 
     it('modal closes by setting activeModal to null', () => {
-      let activeModal: { providerId: ProviderId; setupType: string } | null = { providerId: 'openai' as ProviderId, setupType: 'openai' }
+      let activeModal: { providerId: ProviderId; setupType: string } | null = {
+        providerId: 'openai' as ProviderId,
+        setupType: 'openai',
+      }
       activeModal = null
       expect(activeModal).toBeNull()
     })

@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import type { ProviderId } from './types/usage'
-import HeroMetrics from './components/dashboard/HeroMetrics.vue'
-import ProviderLoginModal from './components/dashboard/ProviderLoginModal.vue'
-import ProviderGrid from './components/dashboard/ProviderGrid.vue'
-import SyncTimeline from './components/dashboard/SyncTimeline.vue'
-import UsagePanel from './components/dashboard/UsagePanel.vue'
-import OpenAiSetupPanel from './components/dashboard/OpenAiSetupPanel.vue'
-import AnthropicSetupPanel from './components/dashboard/AnthropicSetupPanel.vue'
 import { useDashboardData } from './composables/useDashboardData'
+import type { ProviderId } from './types/usage'
 
 const dashboard = useDashboardData()
 
-const providerCount = computed(() => dashboard.snapshot.value.providers.length)
+const _providerCount = computed(() => dashboard.snapshot.value.providers.length)
 
 const activeModal = ref<{ providerId: ProviderId; setupType: 'openai' | 'anthropic' } | null>(null)
 
-function openModal(providerId: ProviderId) {
+function _openModal(providerId: ProviderId) {
   const setupTypeMap: Record<string, 'openai' | 'anthropic'> = {
     openai: 'openai',
     anthropic: 'anthropic',
@@ -27,7 +20,7 @@ function openModal(providerId: ProviderId) {
   }
 }
 
-function closeModal() {
+function _closeModal() {
   activeModal.value = null
 }
 

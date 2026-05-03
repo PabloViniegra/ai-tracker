@@ -1,9 +1,8 @@
-export type ProviderId =
-  | 'openai'
-  | 'anthropic'
+export type ProviderId = 'openai' | 'anthropic'
 
-export type UsageSource = 'official_api'
-export type Confidence = 'high'
+export type UsageSource = 'official_api' | 'experimental_local_oauth' | 'manual'
+
+export type Confidence = 'high' | 'medium' | 'low'
 export type ProviderStatus = 'connected' | 'needs_credentials'
 
 export interface ProviderCapabilities {

@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import { RefreshCw } from "lucide-vue-next";
-
 defineProps<{
-  dailyTokens: number;
-  weeklyTokens: number;
-  totalCost: number;
-  connectedCount: number;
-  providerCount: number;
-  isLoading: boolean;
-}>();
+  dailyTokens: number
+  weeklyTokens: number
+  totalCost: number
+  connectedCount: number
+  providerCount: number
+  isLoading: boolean
+}>()
 
 defineEmits<{
-  sync: [];
-}>();
+  sync: []
+}>()
 
-const numberFormatter = new Intl.NumberFormat("es-ES");
-const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const _numberFormatter = new Intl.NumberFormat('es-ES')
+const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>

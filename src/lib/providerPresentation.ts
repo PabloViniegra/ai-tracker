@@ -26,6 +26,8 @@ export function clampUsagePercent(value: number | null | undefined): number {
 export function sourceLabel(source: UsageSource): string {
   const labels = {
     official_api: 'Official API',
+    experimental_local_oauth: 'Experimental',
+    manual: 'Manual',
   } satisfies Record<UsageSource, string>
 
   return labels[source]
@@ -34,6 +36,8 @@ export function sourceLabel(source: UsageSource): string {
 export function confidenceLabel(confidence: Confidence): string {
   const labels = {
     high: 'High',
+    medium: 'Medium',
+    low: 'Low',
   } satisfies Record<Confidence, string>
 
   return labels[confidence]

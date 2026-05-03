@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { X } from 'lucide-vue-next'
 import { onMounted, onUnmounted } from 'vue'
 import type { ProviderId } from '../../types/usage'
-import { getProviderLogo } from '../../lib/providerPresentation'
 
 type ProviderSetupType = 'openai' | 'anthropic'
 
@@ -22,7 +20,7 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-function handleBackdropClick(event: MouseEvent) {
+function _handleBackdropClick(event: MouseEvent) {
   if (event.target === event.currentTarget) {
     emit('close')
   }

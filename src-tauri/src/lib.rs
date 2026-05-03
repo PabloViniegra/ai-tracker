@@ -1,5 +1,8 @@
 mod anthropic;
+mod connectors;
 mod domain;
+mod normalization;
+mod reconciliation;
 mod openai;
 mod providers;
 mod security;
@@ -11,7 +14,7 @@ use domain::{
     SaveAnthropicCredentialsInput, SaveAnthropicCredentialsResult, SaveOpenAiCredentialsInput,
     SaveOpenAiCredentialsResult, SyncEvent, SyncEventStatus, UsagePoint,
 };
-use providers::{base_provider_catalog, merge_anthropic_summary, merge_openai_summary};
+use providers::{base_provider_catalog, merge_anthropic_source_info, merge_anthropic_summary, merge_openai_summary};
 use reqwest::Client;
 use std::fs;
 use std::path::PathBuf;
@@ -136,6 +139,12 @@ fn dashboard_snapshot(state: &AppState) -> Result<DashboardSnapshot, String> {
     let mut providers = base_provider_catalog();
     merge_openai_summary(&mut providers, &openai_connection, &openai_usage);
     merge_anthropic_summary(&mut providers, &anthropic_connection, &anthropic_usage);
+
+    if let Some(source_state) =
+        storage::load_current_provider_source_state(&state.db_path, "anthropic")?
+    {
+        merge_anthropic_source_info(&mut providers, &source_state);
+    }
 
     let sync_events = events
         .into_iter()
@@ -388,6 +397,96 @@ async fn sync_all_providers(state: State<'_, AppState>) -> Result<DashboardSnaps
     dashboard_snapshot(&state)
 }
 
+#[tauri::command]
+async fn sync_anthropic_experimental(state: State<'_, AppState>) -> Result<String, String> {
+    use crate::connectors::{AnthropicExperimentalConnector, ProviderConnector, SyncPackage};
+
+    let connector = AnthropicExperimentalConnector::new(state.http_client.clone());
+
+    let conn_source = crate::domain::ConnectionSourceRecord {
+        id: None,
+        provider_id: "anthropic".to_string(),
+        source_kind: "experimental_local_oauth".to_string(),
+        credential_ref: Some("local_claude_code".to_string()),
+        source_label: Some("Claude Code (Local)".to_string()),
+        is_enabled: true,
+        last_validated_at: None,
+        last_error: None,
+        last_success_at: None,
+    };
+    let source_id = storage::upsert_connection_source(&state.db_path, &conn_source)?;
+
+    let started_at = now_iso();
+    let sync_result: Result<SyncPackage, crate::connectors::ConnectorError> = connector.sync("local").await;
+
+    match sync_result {
+        Ok(pkg) => {
+            normalization::normalize_and_store(&state.db_path, source_id, pkg)?;
+
+            let mut success_conn = conn_source.clone();
+            success_conn.id = Some(source_id);
+            success_conn.last_success_at = Some(now_iso());
+            success_conn.last_error = None;
+            storage::upsert_connection_source(&state.db_path, &success_conn)?;
+
+            let sync_run = crate::domain::SyncRunRecord {
+                id: None,
+                connection_source_id: source_id,
+                provider_id: "anthropic".to_string(),
+                status: "success".to_string(),
+                started_at,
+                finished_at: Some(now_iso()),
+                message: Some("Sync completed successfully".to_string()),
+                discovered_accounts: 1,
+                discovered_scopes: 1,
+                wrote_snapshots: 0,
+            };
+            storage::insert_sync_run(&state.db_path, &sync_run)?;
+
+            Ok("Sync completed successfully".to_string())
+        }
+        Err(e) => {
+            let mut fail_conn = conn_source;
+            fail_conn.id = Some(source_id);
+            fail_conn.last_error = Some(e.to_string());
+            storage::upsert_connection_source(&state.db_path, &fail_conn)?;
+
+            let sync_run = crate::domain::SyncRunRecord {
+                id: None,
+                connection_source_id: source_id,
+                provider_id: "anthropic".to_string(),
+                status: "warning".to_string(),
+                started_at,
+                finished_at: Some(now_iso()),
+                message: Some(e.to_string()),
+                discovered_accounts: 0,
+                discovered_scopes: 0,
+                wrote_snapshots: 0,
+            };
+            storage::insert_sync_run(&state.db_path, &sync_run)?;
+
+            Err(e.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+fn get_anthropic_sources(state: State<'_, AppState>) -> Result<Vec<crate::domain::ConnectionSourceRecord>, String> {
+    storage::load_connection_sources(&state.db_path, "anthropic")
+}
+
+#[tauri::command]
+async fn enable_anthropic_experimental(state: State<'_, AppState>, enabled: bool) -> Result<(), String> {
+    let sources = storage::load_connection_sources(&state.db_path, "anthropic")?;
+    for mut source in sources {
+        if source.source_kind == "experimental_local_oauth" {
+            source.is_enabled = enabled;
+            storage::upsert_connection_source(&state.db_path, &source)?;
+        }
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -416,7 +515,10 @@ pub fn run() {
             save_openai_credentials,
             get_anthropic_connection,
             save_anthropic_credentials,
-            sync_all_providers
+            sync_all_providers,
+            sync_anthropic_experimental,
+            get_anthropic_sources,
+            enable_anthropic_experimental
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
