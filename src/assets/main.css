@@ -33,8 +33,18 @@
 
   body {
     min-width: 320px;
-    min-height: 100vh;
     margin: 0;
+    overflow: hidden;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  #app {
+    width: 100%;
   }
 
   button,

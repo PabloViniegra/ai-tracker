@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
+import { KeyRound, RefreshCw, Shield } from 'lucide-vue-next'
 import { onMounted, reactive, shallowRef } from 'vue'
-import type {
-  AnthropicConnectionState,
-  DashboardSnapshot,
-  SaveAnthropicCredentialsInput,
-  SaveAnthropicCredentialsResult,
-} from '../../types/usage'
+import type { AnthropicConnectionState, DashboardSnapshot, SaveAnthropicCredentialsInput, SaveAnthropicCredentialsResult } from '../../types/usage'
 
 withDefaults(
   defineProps<{
@@ -41,7 +37,7 @@ async function loadConnection() {
   }
 }
 
-async function _saveCredentials() {
+async function saveCredentials() {
   isLoading.value = true
   message.value = null
   errorMessage.value = null
@@ -66,7 +62,7 @@ async function _saveCredentials() {
   }
 }
 
-async function _syncAnthropic() {
+async function syncAnthropic() {
   isLoading.value = true
   message.value = null
   errorMessage.value = null
@@ -83,9 +79,7 @@ async function _syncAnthropic() {
   }
 }
 
-onMounted(() => {
-  void loadConnection()
-})
+onMounted(() => void loadConnection())
 </script>
 
 <template>

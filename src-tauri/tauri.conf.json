@@ -13,8 +13,14 @@
     "windows": [
       {
         "title": "ai-tracker",
-        "width": 800,
-        "height": 600
+        "width": 960,
+        "height": 720,
+        "minWidth": 960,
+        "minHeight": 720,
+        "maxWidth": 960,
+        "maxHeight": 720,
+        "resizable": false,
+        "maximizable": false
       }
     ],
     "security": {

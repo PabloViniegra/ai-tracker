@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CircleAlert, CircleCheck, Info } from 'lucide-vue-next'
 import type { SyncEvent } from '../../types/usage'
 
 defineProps<{
@@ -7,11 +8,11 @@ defineProps<{
 </script>
 
 <template>
-  <section class="rounded-[1.5rem] border border-ledger-line bg-ledger-panel p-4" aria-labelledby="sync-title">
+  <section class="flex h-full min-h-0 flex-col rounded-[1.6rem] border border-ledger-line bg-ledger-panel p-4" aria-labelledby="sync-title">
     <p class="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-ledger-muted">Connector events</p>
     <h2 id="sync-title" class="text-sm font-semibold text-ledger-ink">Sync log</h2>
 
-    <ol class="mt-4 space-y-2">
+    <ol class="mt-4 min-h-0 space-y-2 overflow-y-auto pr-1">
       <li v-for="event in events" :key="`${event.providerId}-${event.at}`" class="flex gap-2 rounded-2xl bg-ledger-inset p-3">
         <CircleCheck v-if="event.status === 'success'" class="mt-0.5 text-emerald-700" :size="16" aria-hidden="true" />
         <CircleAlert v-else-if="event.status === 'error'" class="mt-0.5 text-red-700" :size="16" aria-hidden="true" />
