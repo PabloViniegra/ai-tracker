@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { AlertTriangle, Clock } from 'lucide-vue-next'
-import { confidenceLabel, sourceLabel } from '../../lib/providerPresentation'
 import type { Confidence, UsageSource } from '../../types/usage'
 
 defineProps<{
@@ -10,7 +8,7 @@ defineProps<{
   isWarning?: boolean
 }>()
 
-function formatRelativeTime(isoString: string | null): string {
+function _formatRelativeTime(isoString: string | null): string {
   if (!isoString) return 'never'
   const date = new Date(isoString)
   const now = new Date()

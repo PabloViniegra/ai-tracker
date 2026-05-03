@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
-import { KeyRound, Shield } from 'lucide-vue-next'
 import { computed, onMounted, reactive, shallowRef } from 'vue'
 import type {
   OpenAiConnectionState,
@@ -33,8 +32,8 @@ const isLoading = shallowRef(false)
 const message = shallowRef<string | null>(null)
 const errorMessage = shallowRef<string | null>(null)
 
-const panelTag = computed(() => (props.isModal ? 'div' : 'section'))
-const panelClass = computed(() =>
+const _panelTag = computed(() => (props.isModal ? 'div' : 'section'))
+const _panelClass = computed(() =>
   props.isModal ? 'mt-4' : 'rounded-[1.5rem] border border-ledger-line bg-ledger-panel p-4',
 )
 
@@ -50,7 +49,7 @@ async function loadConnection() {
   }
 }
 
-async function saveCredentials() {
+async function _saveCredentials() {
   isLoading.value = true
   message.value = null
   errorMessage.value = null

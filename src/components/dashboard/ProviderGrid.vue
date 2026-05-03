@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { KeyRound } from 'lucide-vue-next'
-import {
-  clampUsagePercent,
-  getProviderLogo,
-  statusLabel,
-} from '../../lib/providerPresentation'
 import type { ProviderId, ProviderSummary } from '../../types/usage'
-import SourceIndicator from './SourceIndicator.vue'
 
 defineProps<{
   providers: readonly ProviderSummary[]
 }>()
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   connect: [providerId: ProviderId]
 }>()
 
-const numberFormatter = new Intl.NumberFormat('es-ES')
-const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const _numberFormatter = new Intl.NumberFormat('es-ES')
+const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { CircleAlert, CircleCheck, Info } from 'lucide-vue-next'
 import type { SyncEvent } from '../../types/usage'
 
 defineProps<{

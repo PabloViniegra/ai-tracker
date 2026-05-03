@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { X } from 'lucide-vue-next'
 import { onMounted, onUnmounted } from 'vue'
-import { getProviderLogo } from '../../lib/providerPresentation'
 import { getDashboardModalStyle } from '../../lib/dashboardWindow'
 import type { ProviderId } from '../../types/usage'
 
@@ -17,7 +15,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const dialogStyle = getDashboardModalStyle()
+const _dialogStyle = getDashboardModalStyle()
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
@@ -25,7 +23,7 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-function handleBackdropClick(event: MouseEvent) {
+function _handleBackdropClick(event: MouseEvent) {
   if (event.target === event.currentTarget) {
     emit('close')
   }
