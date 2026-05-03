@@ -5,9 +5,9 @@ defineProps<{
   history: readonly UsagePoint[]
 }>()
 
-const _numberFormatter = new Intl.NumberFormat('es-ES', { notation: 'compact' })
+const numberFormatter = new Intl.NumberFormat('es-ES', { notation: 'compact' })
 
-function _barHeight(tokens: number, history: readonly UsagePoint[]) {
+function barHeight(tokens: number, history: readonly UsagePoint[]) {
   const maxTokens = Math.max(...history.map((point) => point.tokens), 1)
   return `${Math.max(12, Math.round((tokens / maxTokens) * 100))}%`
 }

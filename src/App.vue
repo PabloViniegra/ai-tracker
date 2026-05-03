@@ -5,13 +5,13 @@ import { getDashboardShellStyle } from './lib/dashboardWindow'
 import type { ProviderId } from './types/usage'
 
 const dashboard = useDashboardData()
-const _dashboardShellStyle = getDashboardShellStyle()
+const dashboardShellStyle = getDashboardShellStyle()
 
-const _providerCount = computed(() => dashboard.snapshot.value.providers.length)
+const providerCount = computed(() => dashboard.snapshot.value.providers.length)
 
 const activeModal = ref<{ providerId: ProviderId; setupType: 'openai' | 'anthropic' } | null>(null)
 
-function _openModal(providerId: ProviderId) {
+function openModal(providerId: ProviderId) {
   const setupTypeMap: Record<string, 'openai' | 'anthropic'> = {
     openai: 'openai',
     anthropic: 'anthropic',
@@ -22,7 +22,7 @@ function _openModal(providerId: ProviderId) {
   }
 }
 
-function _closeModal() {
+function closeModal() {
   activeModal.value = null
 }
 

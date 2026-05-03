@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "tauri": "tauri",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write --unsafe .",
+    "lint": "biome check . && vue-tsc --noEmit",
+    "lint:fix": "biome check --write . && vue-tsc --noEmit",
     "format": "biome format --write ."
   },
   "dependencies": {

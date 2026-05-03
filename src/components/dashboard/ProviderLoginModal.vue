@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { getDashboardModalStyle } from '../../lib/dashboardWindow'
+import { getProviderLogo } from '../../lib/providerPresentation'
 import type { ProviderId } from '../../types/usage'
 
 type ProviderSetupType = 'openai' | 'anthropic'
@@ -15,7 +16,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const _dialogStyle = getDashboardModalStyle()
+const dialogStyle = getDashboardModalStyle()
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
@@ -23,7 +24,7 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-function _handleBackdropClick(event: MouseEvent) {
+function handleBackdropClick(event: MouseEvent) {
   if (event.target === event.currentTarget) {
     emit('close')
   }

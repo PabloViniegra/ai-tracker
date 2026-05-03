@@ -41,7 +41,7 @@ async function loadConnection() {
   }
 }
 
-async function _saveCredentials() {
+async function saveCredentials() {
   isLoading.value = true
   message.value = null
   errorMessage.value = null
@@ -66,7 +66,7 @@ async function _saveCredentials() {
   }
 }
 
-async function _syncAnthropic() {
+async function syncAnthropic() {
   isLoading.value = true
   message.value = null
   errorMessage.value = null

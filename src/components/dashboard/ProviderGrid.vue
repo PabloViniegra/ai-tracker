@@ -1,16 +1,17 @@
 <script setup lang="ts">
+import { clampUsagePercent, getProviderLogo, statusLabel } from '../../lib/providerPresentation'
 import type { ProviderId, ProviderSummary } from '../../types/usage'
 
 defineProps<{
   providers: readonly ProviderSummary[]
 }>()
 
-const _emit = defineEmits<{
+const emit = defineEmits<{
   connect: [providerId: ProviderId]
 }>()
 
-const _numberFormatter = new Intl.NumberFormat('es-ES')
-const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const numberFormatter = new Intl.NumberFormat('es-ES')
+const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>

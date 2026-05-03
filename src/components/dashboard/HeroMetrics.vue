@@ -12,8 +12,8 @@ defineEmits<{
   sync: []
 }>()
 
-const _numberFormatter = new Intl.NumberFormat('es-ES')
-const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const numberFormatter = new Intl.NumberFormat('es-ES')
+const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>
