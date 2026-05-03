@@ -1,26 +1,33 @@
 <script setup lang="ts">
+import { KeyRound } from 'lucide-vue-next'
+import {
+  clampUsagePercent,
+  getProviderLogo,
+  statusLabel,
+} from '../../lib/providerPresentation'
 import type { ProviderId, ProviderSummary } from '../../types/usage'
+import SourceIndicator from './SourceIndicator.vue'
 
 defineProps<{
   providers: readonly ProviderSummary[]
 }>()
 
-const _emit = defineEmits<{
+const emit = defineEmits<{
   connect: [providerId: ProviderId]
 }>()
 
-const _numberFormatter = new Intl.NumberFormat('es-ES')
-const _currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+const numberFormatter = new Intl.NumberFormat('es-ES')
+const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 </script>
 
 <template>
-  <section class="rounded-[1.75rem] border border-ledger-line bg-ledger-panel p-3" id="providers" aria-label="Provider connectors">
+  <section class="flex h-full min-h-0 flex-col rounded-[1.8rem] border border-ledger-line bg-ledger-panel p-4" id="providers" aria-label="Provider connectors">
     <div class="flex items-center justify-between px-1 pb-2">
       <h2 class="text-sm font-semibold text-ledger-ink">Provider cost strips</h2>
       <span class="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-ledger-muted">tokens · cost · source</span>
     </div>
 
-    <div class="divide-y divide-ledger-line/70">
+    <div class="min-h-0 divide-y divide-ledger-line/70 overflow-y-auto pr-1">
       <article v-for="provider in providers" :key="provider.id" class="grid gap-2 py-3 first:pt-2 sm:grid-cols-[150px_1fr_auto] sm:items-center">
         <div class="flex min-w-0 items-center gap-3">
           <span class="grid size-9 shrink-0 place-items-center rounded-xl border border-ledger-line bg-ledger-paper text-[0.68rem] font-bold text-ledger-ink">

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next'
 import { onMounted, onUnmounted } from 'vue'
+import { getProviderLogo } from '../../lib/providerPresentation'
+import { getDashboardModalStyle } from '../../lib/dashboardWindow'
 import type { ProviderId } from '../../types/usage'
 
 type ProviderSetupType = 'openai' | 'anthropic'
@@ -14,13 +17,15 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const dialogStyle = getDashboardModalStyle()
+
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     emit('close')
   }
 }
 
-function _handleBackdropClick(event: MouseEvent) {
+function handleBackdropClick(event: MouseEvent) {
   if (event.target === event.currentTarget) {
     emit('close')
   }
@@ -53,7 +58,7 @@ onUnmounted(() => {
         :aria-labelledby="`modal-title-${providerId}`"
         @click="handleBackdropClick"
       >
-        <div class="w-full max-w-md rounded-2xl border border-ledger-line bg-ledger-panel p-6 shadow-2xl">
+        <div class="w-full max-w-md overflow-y-auto rounded-2xl border border-ledger-line bg-ledger-panel p-6 shadow-2xl" :style="dialogStyle">
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <span class="grid size-10 shrink-0 place-items-center rounded-xl border border-ledger-line bg-ledger-paper">
